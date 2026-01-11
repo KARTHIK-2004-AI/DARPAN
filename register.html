@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | DARPAN</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="flex-center" style="min-height: 100vh;">
+
+    <div class="glass-card" style="width: 100%; max-width: 500px; animation: fadeIn 0.5s ease-out;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <a href="index.html" style="text-decoration: none;">
+                <h2>🌌 DARPAN</h2>
+            </a>
+            <p style="opacity: 0.7;">Join the Galactic Federation of Learners.</p>
+        </div>
+
+        <form id="register-form">
+            <div class="form-group">
+                <input type="text" id="reg-username" placeholder="Choose Callsign (Username)" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="reg-email" placeholder="Comms Channel (Email)" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="reg-password" placeholder="Secure Key (Password)" required>
+            </div>
+            <div class="form-group">
+                <select id="reg-grade" required>
+                    <option value="" disabled selected>Select Clearance Level (Grade)</option>
+                    <option value="6">Level 6 (Grade 6)</option>
+                    <option value="7">Level 7 (Grade 7)</option>
+                    <option value="8">Level 8 (Grade 8)</option>
+                    <option value="9">Level 9 (Grade 9)</option>
+                    <option value="10">Level 10 (Grade 10)</option>
+                    <option value="11">Level 11 (Grade 11)</option>
+                    <option value="12">Level 12 (Grade 12)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%;">Create Profile</button>
+            <div id="register-error" style="color: var(--plasma-pink); margin-top: 1rem; text-align: center;"></div>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem; opacity: 0.7; font-size: 0.9rem;">
+            <p>Already have clearance? <a href="login.html"
+                    style="color: var(--cyber-cyan); text-decoration: none;">Login</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const grade = document.getElementById('reg-grade').value;
+            const errorDiv = document.getElementById('register-error');
+            const btn = e.target.querySelector('button');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Authenticating...';
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, grade })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    // Auto login after register? Or redirect to login? Let's redirect to login for clarity.
+                    window.location.href = '/login.html?registered=true';
+                } else {
+                    errorDiv.textContent = data.error;
+                    btn.disabled = false;
+                    btn.textContent = 'Create Profile';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'Registration failed. System glitch.';
+                btn.disabled = false;
+                btn.textContent = 'Create Profile';
+            }
+        });
+    </script>
+</body>
+
+</html>

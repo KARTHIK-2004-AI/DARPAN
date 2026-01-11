@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARPAN Admin Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh; color: white;
+        }
+        .header { 
+            background: rgba(0,0,0,0.8); padding: 1rem; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        .stats-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 2rem; margin-bottom: 3rem;
+        }
+        .stat-card { 
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            padding: 2rem; border-radius: 15px; text-align: center;
+        }
+        .stat-number { font-size: 3rem; font-weight: bold; color: #4ECDC4; }
+        .stat-label { font-size: 1.1rem; opacity: 0.8; margin-top: 0.5rem; }
+        
+        .dashboard-section { 
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            margin-bottom: 2rem; border-radius: 15px; overflow: hidden;
+        }
+        .section-header { 
+            background: rgba(0,0,0,0.3); padding: 1rem 2rem; 
+            font-size: 1.3rem; font-weight: bold;
+        }
+        .section-content { padding: 2rem; }
+        
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { 
+            padding: 1rem; text-align: left; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .table th { background: rgba(0,0,0,0.2); font-weight: bold; }
+        .table tr:hover { background: rgba(255,255,255,0.05); }
+        
+        .btn { 
+            background: #4ECDC4; border: none; padding: 0.75rem 1.5rem; 
+            border-radius: 25px; color: white; cursor: pointer; 
+            font-size: 1rem; text-decoration: none; display: inline-block;
+        }
+        .btn:hover { background: #45B7D1; }
+        .btn.secondary { background: #6c757d; }
+        
+        .login-form { 
+            max-width: 400px; margin: 5rem auto; 
+            background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; }
+        .form-group input { 
+            width: 100%; padding: 0.75rem; border: none; border-radius: 8px;
+            background: rgba(255,255,255,0.9); color: #333;
+        }
+        
+        .hidden { display: none; }
+        .error { color: #ff6b6b; margin-top: 0.5rem; }
+        .success { color: #51cf66; margin-top: 0.5rem; }
+        
+        .chart-container { 
+            background: rgba(255,255,255,0.9); border-radius: 10px; 
+            padding: 1rem; margin: 1rem 0; color: #333;
+        }
+        .progress-bar { 
+            width: 100%; height: 20px; background: rgba(255,255,255,0.2); 
+            border-radius: 10px; overflow: hidden; margin: 0.5rem 0;
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #4ECDC4, #44A08D); 
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>🔧 DARPAN Admin Dashboard</h2>
+        <div id="admin-info" class="hidden">
+            <span>Admin: <span id="admin-username"></span></span>
+            <button class="btn secondary" onclick="logout()" style="margin-left: 1rem;">Logout</button>
+        </div>
+    </div>
+
+    <div id="login-section" class="login-form">
+        <h3 style="text-align: center; margin-bottom: 2rem;">🔐 Admin Login</h3>
+        <form id="admin-login-form">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="admin-username-input" value="admin" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="admin-password-input" value="admin123" required>
+            </div>
+            <button type="submit" class="btn" style="width: 100%;">Login to Dashboard</button>
+            <div id="login-error" class="error"></div>
+        </form>
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="/" class="btn secondary">← Back to Home</a>
+        </div>
+    </div>
+
+    <div id="dashboard-content" class="container hidden">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-students">0</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-sessions">0</div>
+                <div class="stat-label">Game Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avg-score">0</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="active-today">0</div>
+                <div class="stat-label">Active Today</div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">📊 Subject Performance Analytics</div>
+            <div class="section-content">
+                <div id="subject-analytics"></div>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">👥 Student Management</div>
+            <div class="section-content">
+                <table class="table" id="students-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Grade</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">🎮 Recent Game Sessions</div>
+            <div class="section-content">
+                <table class="table" id="sessions-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Game Type</th>
+                            <th>Score</th>
+                            <th>Time Spent</th>
+                            <th>Completed</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">💾 Database Management</div>
+            <div class="section-content">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="exportData()">📥 Export Data</button>
+                    <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
+                    <button class="btn secondary" onclick="viewDatabase()">🗄️ View Database</button>
+                </div>
+                <div id="database-info" style="margin-top: 2rem; padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                    <h4>Database Status: <span style="color: #51cf66;">Connected ✅</span></h4>
+                    <p>SQLite Database: darpan.db</p>
+                    <p>Last Updated: <span id="last-updated">Loading...</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAdmin = null;
+
+        // Check if admin is already logged in
+        const token = localStorage.getItem('adminToken');
+        if (token) {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload.exp > Date.now() / 1000 && payload.role === 'admin') {
+                    currentAdmin = JSON.parse(localStorage.getItem('adminUser'));
+                    showDashboard();
+                }
+            } catch (e) {
+                localStorage.removeItem('adminToken');
+                localStorage.removeItem('adminUser');
+            }
+        }
+
+        // Admin login form handler
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('admin-username-input').value;
+            const password = document.getElementById('admin-password-input').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                if (response.ok && data.user.role === 'admin') {
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminUser', JSON.stringify(data.user));
+                    currentAdmin = data.user;
+                    showDashboard();
+                    document.getElementById('login-error').textContent = '';
+                } else {
+                    document.getElementById('login-error').textContent = 'Invalid admin credentials';
+                }
+            } catch (error) {
+                document.getElementById('login-error').textContent = 'Login failed. Please try again.';
+            }
+        });
+
+        async function showDashboard() {
+            document.getElementById('login-section').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            document.getElementById('admin-info').classList.remove('hidden');
+            document.getElementById('admin-username').textContent = currentAdmin.username;
+            
+            await loadDashboardData();
+        }
+
+        async function loadDashboardData() {
+            try {
+                // Load dashboard statistics
+                const dashboardResponse = await fetch('/api/admin/dashboard', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const dashboardData = await dashboardResponse.json();
+
+                // Update statistics
+                document.getElementById('total-students').textContent = dashboardData.users[0]?.count || 0;
+                document.getElementById('total-sessions').textContent = dashboardData.sessions[0]?.count || 0;
+                document.getElementById('avg-score').textContent = Math.round(dashboardData.avgScore[0]?.avg || 0);
+                document.getElementById('active-today').textContent = Math.floor(Math.random() * 20) + 5; // Mock data
+
+                // Load subject analytics
+                loadSubjectAnalytics(dashboardData.subjects);
+
+                // Load students table
+                const usersResponse = await fetch('/api/admin/users', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const users = await usersResponse.json();
+                loadStudentsTable(users);
+
+                // Load sessions table
+                const sessionsResponse = await fetch('/api/admin/sessions', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const sessions = await sessionsResponse.json();
+                loadSessionsTable(sessions);
+
+                // Update last updated time
+                document.getElementById('last-updated').textContent = new Date().toLocaleString();
+
+            } catch (error) {
+                console.error('Failed to load dashboard data:', error);
+            }
+        }
+
+        function loadSubjectAnalytics(subjects) {
+            const container = document.getElementById('subject-analytics');
+            container.innerHTML = '';
+
+            if (!subjects || subjects.length === 0) {
+                container.innerHTML = '<p>No subject data available yet.</p>';
+                return;
+            }
+
+            subjects.forEach(subject => {
+                const subjectDiv = document.createElement('div');
+                subjectDiv.innerHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <h4>${subject.subject.toUpperCase()}</h4>
+                        <div style="display: flex; justify-content: space-between; margin: 0.5rem 0;">
+                            <span>Sessions: ${subject.sessions}</span>
+                            <span>Avg Score: ${Math.round(subject.avg_score || 0)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min(100, (subject.avg_score || 0))}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(subjectDiv);
+            });
+        }
+
+        function loadStudentsTable(users) {
+            const tbody = document.querySelector('#students-table tbody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>Grade ${user.grade}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td>
+                        <button class="btn" onclick="viewStudentProgress(${user.id})" style="padding: 0.5rem 1rem; font-size: 0.9rem;">View Progress</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function loadSessionsTable(sessions) {
+            const tbody = document.querySelector('#sessions-table tbody');
+            tbody.innerHTML = '';
+
+            sessions.slice(0, 20).forEach(session => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${session.username}</td>
+                    <td>${session.subject}</td>
+                    <td>${session.game_type}</td>
+                    <td>${session.score}</td>
+                    <td>${Math.floor(session.time_spent / 60)}:${(session.time_spent % 60).toString().padStart(2, '0')}</td>
+                    <td>${session.completed ? '✅' : '❌'}</td>
+                    <td>${new Date(session.created_at).toLocaleDateString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function viewStudentProgress(userId) {
+            try {
+                const response = await fetch(`/api/progress/${userId}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const progress = await response.json();
+                
+                let progressHtml = `<h3>Student Progress Report</h3>`;
+                if (progress.length === 0) {
+                    progressHtml += '<p>No progress data available for this student.</p>';
+                } else {
+                    progress.forEach(p => {
+                        progressHtml += `
+                            <div style="margin: 1rem 0; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 10px;">
+                                <strong>${p.subject} - ${p.concept}</strong><br>
+                                Mastery Level: ${Math.round(p.mastery_level * 100)}%<br>
+                                Attempts: ${p.attempts}<br>
+                                Best Score: ${p.best_score}
+                            </div>
+                        `;
+                    });
+                }
+                
+                alert(progressHtml.replace(/<[^>]*>/g, '\n')); // Simple alert for demo
+            } catch (error) {
+                alert('Failed to load student progress');
+            }
+        }
+
+        function exportData() {
+            // Simple CSV export simulation
+            const csvData = "Student,Subject,Score,Date\nJohn,Math,85,2024-01-15\nJane,Science,92,2024-01-15";
+            const blob = new Blob([csvData], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'darpan_data.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function refreshData() {
+            loadDashboardData();
+            alert('Data refreshed successfully!');
+        }
+
+        function viewDatabase() {
+            alert('Database Viewer:\n\nTables:\n- users (Students and admins)\n- game_sessions (All game activities)\n- progress (Learning progress tracking)\n\nDatabase file: darpan.db\nType: SQLite\nStatus: Active');
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            currentAdmin = null;
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('dashboard-content').classList.add('hidden');
+            document.getElementById('admin-info').classList.add('hidden');
+        }
+
+        // Auto-refresh data every 30 seconds
+        setInterval(() => {
+            if (currentAdmin) {
+                loadDashboardData();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

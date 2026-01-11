@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARPAN - Complete Learning Platform</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { font-size: 4rem; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        
+        .nav-tabs { 
+            display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem;
+        }
+        .tab-btn { 
+            background: rgba(255,255,255,0.2); border: none; padding: 1rem 2rem;
+            border-radius: 25px; color: white; cursor: pointer; font-size: 1rem;
+        }
+        .tab-btn.active { background: #4ECDC4; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .game-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 2rem; margin-bottom: 2rem;
+        }
+        .game-card { 
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 15px; padding: 2rem; cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .game-card:hover { transform: translateY(-10px); }
+        .game-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+        
+        .game-interface { 
+            display: none; background: rgba(255,255,255,0.1); 
+            border-radius: 15px; padding: 2rem; margin-top: 2rem;
+        }
+        .game-canvas { 
+            width: 100%; height: 400px; background: rgba(0,0,0,0.3);
+            border-radius: 10px; position: relative; margin: 1rem 0;
+        }
+        .draggable { 
+            position: absolute; cursor: grab; background: rgba(255,255,255,0.9);
+            color: #333; padding: 1rem; border-radius: 10px; font-weight: bold;
+        }
+        .drop-zone { 
+            position: absolute; border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 10px; padding: 1rem; text-align: center;
+        }
+        .drop-zone.active { border-color: #4ECDC4; background: rgba(78, 205, 196, 0.2); }
+        
+        .btn { 
+            background: #4ECDC4; border: none; padding: 1rem 2rem;
+            border-radius: 25px; color: white; cursor: pointer; font-size: 1rem;
+        }
+        .btn:hover { background: #45B7D1; }
+        .btn.secondary { background: #6c757d; }
+        
+        .stats-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem; margin-bottom: 2rem;
+        }
+        .stat-card { 
+            background: rgba(255,255,255,0.1); padding: 1.5rem; 
+            border-radius: 15px; text-align: center;
+        }
+        .stat-number { font-size: 2rem; font-weight: bold; color: #4ECDC4; }
+        
+        .hidden { display: none; }
+        .feedback { 
+            text-align: center; padding: 1rem; border-radius: 10px; margin: 1rem 0;
+        }
+        .feedback.success { background: rgba(81, 207, 102, 0.3); }
+        .feedback.error { background: rgba(255, 107, 107, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌌 DARPAN</h1>
+            <p>Complete Gamified Learning Platform</p>
+            <p><em>"Where Learning Becomes Gaming"</em></p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="showTab('games')">🎮 STEM Games</button>
+            <button class="tab-btn" onclick="showTab('progress')">📊 Progress</button>
+            <button class="tab-btn" onclick="showTab('admin')">🔧 Admin Dashboard</button>
+        </div>
+
+        <!-- Games Tab -->
+        <div id="games-tab" class="tab-content active">
+            <div class="game-grid">
+                <div class="game-card" onclick="startGame('math-fractions')">
+                    <div class="game-icon">🍕</div>
+                    <h3>Math: Fraction Pizza</h3>
+                    <p>Help aliens divide pizzas into equal parts. Learn fractions through resource management!</p>
+                    <div style="margin-top: 1rem; opacity: 0.8;">Difficulty: ⭐⭐⭐ | Time: 10 min</div>
+                </div>
+
+                <div class="game-card" onclick="startGame('science-circuits')">
+                    <div class="game-icon">⚡</div>
+                    <h3>Science: Circuit Builder</h3>
+                    <p>Build electrical circuits to power space stations. Learn about electricity!</p>
+                    <div style="margin-top: 1rem; opacity: 0.8;">Difficulty: ⭐⭐⭐⭐ | Time: 15 min</div>
+                </div>
+
+                <div class="game-card" onclick="startGame('engineering-bridge')">
+                    <div class="game-icon">🌉</div>
+                    <h3>Engineering: Bridge Designer</h3>
+                    <p>Design bridges using physics simulation and structural engineering!</p>
+                    <div style="margin-top: 1rem; opacity: 0.8;">Difficulty: ⭐⭐⭐⭐⭐ | Time: 20 min</div>
+                </div>
+
+                <div class="game-card" onclick="startGame('tech-coding')">
+                    <div class="game-icon">💻</div>
+                    <h3>Technology: Code Quest</h3>
+                    <p>Program robots to solve puzzles using visual programming blocks!</p>
+                    <div style="margin-top: 1rem; opacity: 0.8;">Difficulty: ⭐⭐⭐ | Time: 12 min</div>
+                </div>
+            </div>
+
+            <div id="game-interface" class="game-interface">
+                <h2 id="game-title">Game Title</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 1rem 0;">
+                    <div>Score: <span id="score">0</span> | Time: <span id="timer">0:00</span></div>
+                    <button class="btn secondary" onclick="backToGames()">← Back to Games</button>
+                </div>
+                <div class="game-canvas" id="game-canvas"></div>
+                <div id="feedback" class="feedback hidden"></div>
+                <div style="text-align: center;">
+                    <button class="btn" onclick="showHint()">💡 Hint</button>
+                    <button class="btn" onclick="resetGame()">🔄 Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Tab -->
+        <div id="progress-tab" class="tab-content">
+            <h2>📊 Learning Progress</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="games-played">12</div>
+                    <div>Games Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-score">850</div>
+                    <div>Total Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="concepts-mastered">8</div>
+                    <div>Concepts Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="time-spent">2.5h</div>
+                    <div>Time Spent Learning</div>
+                </div>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px;">
+                <h3>Subject Progress</h3>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Mathematics</span><span>75%</span>
+                    </div>
+                    <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0.5rem 0;">
+                        <div style="width: 75%; height: 100%; background: #4ECDC4; border-radius: 5px;"></div>
+                    </div>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Science</span><span>60%</span>
+                    </div>
+                    <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0.5rem 0;">
+                        <div style="width: 60%; height: 100%; background: #4ECDC4; border-radius: 5px;"></div>
+                    </div>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Engineering</span><span>45%</span>
+                    </div>
+                    <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0.5rem 0;">
+                        <div style="width: 45%; height: 100%; background: #4ECDC4; border-radius: 5px;"></div>
+                    </div>
+                </div>
+                <div style="margin: 1rem 0;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Technology</span><span>80%</span>
+                    </div>
+                    <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; margin: 0.5rem 0;">
+                        <div style="width: 80%; height: 100%; background: #4ECDC4; border-radius: 5px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Tab -->
+        <div id="admin-tab" class="tab-content">
+            <h2>🔧 Admin Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">47</div>
+                    <div>Total Students</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">324</div>
+                    <div>Game Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">78</div>
+                    <div>Average Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">23</div>
+                    <div>Active Today</div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+                <h3>Recent Student Activity</h3>
+                <div style="margin-top: 1rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>John Doe - Math Fractions</span>
+                        <span>Score: 85 | 5 min ago</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Jane Smith - Circuit Builder</span>
+                        <span>Score: 92 | 12 min ago</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <span>Mike Johnson - Bridge Designer</span>
+                        <span>Score: 78 | 18 min ago</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0;">
+                        <span>Sarah Wilson - Code Quest</span>
+                        <span>Score: 95 | 25 min ago</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px;">
+                <h3>Database Management</h3>
+                <div style="margin-top: 1rem;">
+                    <p>📊 Database Status: <span style="color: #51cf66;">Connected ✅</span></p>
+                    <p>💾 Total Records: 1,247</p>
+                    <p>🔄 Last Updated: Just now</p>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn" onclick="exportData()">📥 Export Data</button>
+                        <button class="btn" onclick="refreshData()">🔄 Refresh</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentGame = null;
+        let gameState = { score: 0, startTime: null };
+        let gameTimer = null;
+
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function startGame(gameType) {
+            currentGame = gameType;
+            document.querySelector('.game-grid').style.display = 'none';
+            document.getElementById('game-interface').style.display = 'block';
+            
+            gameState = { score: 0, startTime: Date.now(), correctPlacements: 0 };
+            gameTimer = setInterval(updateTimer, 1000);
+            
+            switch(gameType) {
+                case 'math-fractions':
+                    initFractionGame();
+                    break;
+                case 'science-circuits':
+                    initCircuitGame();
+                    break;
+                case 'engineering-bridge':
+                    initBridgeGame();
+                    break;
+                case 'tech-coding':
+                    initCodingGame();
+                    break;
+            }
+        }
+
+        function initFractionGame() {
+            document.getElementById('game-title').textContent = 'Math: Fraction Pizza Challenge';
+            document.getElementById('game-canvas').innerHTML = `
+                <div class="draggable" style="top: 50px; left: 50px;" draggable="true" data-fraction="1/2">🍕 Half Pizza</div>
+                <div class="draggable" style="top: 120px; left: 50px;" draggable="true" data-fraction="1/4">🍕 Quarter Pizza</div>
+                <div class="draggable" style="top: 190px; left: 50px;" draggable="true" data-fraction="3/4">🍕 Three-Quarter Pizza</div>
+                
+                <div class="drop-zone" style="top: 50px; right: 50px; width: 150px; height: 60px;" data-needs="1/2">
+                    👽 Colony A<br><small>Needs: 1/2</small>
+                </div>
+                <div class="drop-zone" style="top: 130px; right: 50px; width: 150px; height: 60px;" data-needs="1/4">
+                    👽 Colony B<br><small>Needs: 1/4</small>
+                </div>
+                <div class="drop-zone" style="top: 210px; right: 50px; width: 150px; height: 60px;" data-needs="3/4">
+                    👽 Colony C<br><small>Needs: 3/4</small>
+                </div>
+            `;
+            setupDragAndDrop();
+        }
+
+        function initCircuitGame() {
+            document.getElementById('game-title').textContent = 'Science: Circuit Builder Challenge';
+            document.getElementById('game-canvas').innerHTML = `
+                <div class="draggable" style="top: 50px; left: 50px;" draggable="true" data-component="battery">🔋 Battery</div>
+                <div class="draggable" style="top: 120px; left: 50px;" draggable="true" data-component="resistor">📏 Resistor</div>
+                <div class="draggable" style="top: 190px; left: 50px;" draggable="true" data-component="led">💡 LED</div>
+                
+                <div class="drop-zone" style="top: 100px; left: 300px; width: 100px; height: 60px;" data-accepts="battery">
+                    Power Source
+                </div>
+                <div class="drop-zone" style="top: 100px; left: 450px; width: 100px; height: 60px;" data-accepts="resistor">
+                    Component
+                </div>
+                <div class="drop-zone" style="top: 100px; left: 600px; width: 100px; height: 60px;" data-accepts="led">
+                    Output
+                </div>
+            `;
+            setupDragAndDrop();
+        }
+
+        function initBridgeGame() {
+            document.getElementById('game-title').textContent = 'Engineering: Bridge Designer Challenge';
+            document.getElementById('game-canvas').innerHTML = `
+                <div style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); color: #333; padding: 1rem; border-radius: 10px;">
+                    <h4>Materials:</h4>
+                    <div class="draggable" style="position: relative; margin: 5px;" draggable="true" data-material="steel">📏 Steel Beam</div>
+                    <div class="draggable" style="position: relative; margin: 5px;" draggable="true" data-material="wood">🪵 Wood Beam</div>
+                    <div class="draggable" style="position: relative; margin: 5px;" draggable="true" data-material="cable">🔗 Cable</div>
+                </div>
+                
+                <div class="drop-zone" style="bottom: 50px; left: 200px; width: 400px; height: 100px;" data-accepts="any">
+                    🌉 Bridge Construction Area<br>
+                    <small>Drag materials here to build your bridge</small>
+                </div>
+                
+                <button class="btn" onclick="testBridge()" style="position: absolute; bottom: 20px; right: 20px;">🧪 Test Bridge</button>
+            `;
+            setupDragAndDrop();
+        }
+
+        function initCodingGame() {
+            document.getElementById('game-title').textContent = 'Technology: Code Quest Challenge';
+            document.getElementById('game-canvas').innerHTML = `
+                <div style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); color: #333; padding: 1rem; border-radius: 10px;">
+                    <h4>Code Blocks:</h4>
+                    <div class="draggable" style="position: relative; margin: 5px; background: #4ECDC4;" draggable="true" data-code="move">➡️ Move Forward</div>
+                    <div class="draggable" style="position: relative; margin: 5px; background: #FFD93D;" draggable="true" data-code="turn">🔄 Turn Right</div>
+                    <div class="draggable" style="position: relative; margin: 5px; background: #FF6B6B;" draggable="true" data-code="loop">🔁 Repeat 3x</div>
+                </div>
+                
+                <div style="position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.9); color: #333; padding: 1rem; border-radius: 10px;">
+                    <h4>Program:</h4>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;" data-step="1">Step 1</div>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;" data-step="2">Step 2</div>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;" data-step="3">Step 3</div>
+                    <button class="btn" onclick="runProgram()" style="margin-top: 10px;">▶️ Run Program</button>
+                </div>
+                
+                <div style="position: absolute; bottom: 50px; left: 50px; font-size: 3rem;">🤖</div>
+                <div style="position: absolute; bottom: 50px; right: 200px; font-size: 2rem;">🎯 Goal</div>
+            `;
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify({
+                        id: e.target.dataset,
+                        content: e.target.textContent
+                    }));
+                    e.target.style.opacity = '0.5';
+                });
+
+                draggable.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = '1';
+                });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('active');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('active');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('active');
+                    handleDrop(e, zone);
+                });
+            });
+        }
+
+        function handleDrop(e, zone) {
+            const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+            
+            // Check if drop is correct based on game type
+            let isCorrect = false;
+            
+            if (currentGame === 'math-fractions') {
+                isCorrect = dragData.id.fraction === zone.dataset.needs;
+            } else if (currentGame === 'science-circuits') {
+                isCorrect = zone.dataset.accepts === dragData.id.component;
+            } else {
+                isCorrect = true; // For bridge and coding games, any drop is valid
+            }
+            
+            if (isCorrect) {
+                gameState.correctPlacements++;
+                updateScore(20);
+                showFeedback('Correct! Great job! 🎉', 'success');
+                
+                // Hide the dragged element
+                const draggedElements = document.querySelectorAll(`[data-${Object.keys(dragData.id)[0]}="${Object.values(dragData.id)[0]}"]`);
+                draggedElements.forEach(el => el.style.display = 'none');
+                
+                // Check if game is complete
+                if (gameState.correctPlacements >= 3) {
+                    setTimeout(completeGame, 1000);
+                }
+            } else {
+                showFeedback('Try again! Check what each colony needs. 🤔', 'error');
+            }
+        }
+
+        function testBridge() {
+            if (gameState.correctPlacements >= 2) {
+                showFeedback('Bridge test successful! Strong enough! 🌉✅', 'success');
+                completeGame();
+            } else {
+                showFeedback('Bridge needs more materials! 🔧', 'error');
+            }
+        }
+
+        function runProgram() {
+            if (gameState.correctPlacements >= 3) {
+                showFeedback('Program executed! Robot reached goal! 🤖🎯', 'success');
+                completeGame();
+            } else {
+                showFeedback('Program needs more steps! 💻', 'error');
+            }
+        }
+
+        function updateScore(points) {
+            gameState.score += points;
+            document.getElementById('score').textContent = gameState.score;
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.classList.remove('hidden');
+            
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+            }, 3000);
+        }
+
+        function completeGame() {
+            clearInterval(gameTimer);
+            const timeSpent = Math.floor((Date.now() - gameState.startTime) / 1000);
+            
+            showFeedback(`🎉 Game Complete! Final Score: ${gameState.score} | Time: ${Math.floor(timeSpent/60)}:${(timeSpent%60).toString().padStart(2,'0')}`, 'success');
+            
+            // Update progress stats
+            const gamesPlayed = parseInt(document.getElementById('games-played').textContent) + 1;
+            const totalScore = parseInt(document.getElementById('total-score').textContent) + gameState.score;
+            
+            document.getElementById('games-played').textContent = gamesPlayed;
+            document.getElementById('total-score').textContent = totalScore;
+        }
+
+        function showHint() {
+            const hints = {
+                'math-fractions': 'Match the pizza fractions to what each alien colony needs! 🍕',
+                'science-circuits': 'Connect battery → resistor → LED to complete the circuit! ⚡',
+                'engineering-bridge': 'Use different materials to build a strong bridge, then test it! 🌉',
+                'tech-coding': 'Drag code blocks in sequence to program the robot! 💻'
+            };
+            
+            showFeedback(`💡 Hint: ${hints[currentGame]}`, 'success');
+        }
+
+        function resetGame() {
+            if (currentGame) {
+                startGame(currentGame);
+            }
+        }
+
+        function backToGames() {
+            if (gameTimer) clearInterval(gameTimer);
+            document.querySelector('.game-grid').style.display = 'grid';
+            document.getElementById('game-interface').style.display = 'none';
+        }
+
+        function exportData() {
+            const data = "Student,Game,Score,Date\nDemo User,Math Fractions,85,2024-01-15\nDemo User,Circuit Builder,92,2024-01-15";
+            const blob = new Blob([data], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'darpan_demo_data.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function refreshData() {
+            // Simulate data refresh
+            document.querySelector('.stat-card .stat-number').textContent = Math.floor(Math.random() * 100) + 20;
+            showFeedback('Data refreshed successfully! 🔄', 'success');
+        }
+
+        // Initialize the platform
+        console.log('🌌 DARPAN Complete Platform Loaded!');
+        console.log('🎮 Features: STEM Games, Progress Tracking, Admin Dashboard');
+        console.log('📚 Ready to revolutionize education!');
+    </script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARPAN Games - STEM Learning</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; color: white;
+        }
+        .header { 
+            background: rgba(0,0,0,0.8); padding: 1rem; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .user-info { display: flex; align-items: center; gap: 1rem; }
+        .progress-bar { 
+            width: 200px; height: 10px; background: rgba(255,255,255,0.2); 
+            border-radius: 5px; overflow: hidden;
+        }
+        .progress-fill { 
+            height: 100%; background: linear-gradient(90deg, #4ECDC4, #44A08D); 
+            width: 0%; transition: width 0.5s;
+        }
+        
+        .game-selection { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 2rem; padding: 2rem; max-width: 1200px; margin: 0 auto;
+        }
+        .game-card { 
+            background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);
+            border-radius: 15px; padding: 2rem; cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .game-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .game-icon { font-size: 4rem; text-align: center; margin-bottom: 1rem; }
+        
+        .game-interface { 
+            display: none; padding: 2rem; max-width: 1000px; margin: 0 auto;
+        }
+        .game-canvas { 
+            width: 100%; height: 500px; 
+            background: rgba(255,255,255,0.1); border-radius: 15px;
+            position: relative; overflow: hidden; margin-bottom: 2rem;
+        }
+        .game-controls { 
+            display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+        }
+        .btn { 
+            background: #4ECDC4; border: none; padding: 1rem 2rem; 
+            border-radius: 25px; color: white; cursor: pointer; font-size: 1rem;
+        }
+        .btn:hover { background: #45B7D1; }
+        .btn.secondary { background: #6c757d; }
+        
+        .draggable { 
+            position: absolute; cursor: grab; user-select: none;
+            background: rgba(255,255,255,0.9); color: #333;
+            padding: 1rem; border-radius: 10px; font-weight: bold;
+        }
+        .draggable:active { cursor: grabbing; }
+        .drop-zone { 
+            position: absolute; border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 1.2rem;
+        }
+        .drop-zone.active { border-color: #4ECDC4; background: rgba(78, 205, 196, 0.2); }
+        
+        .score-display { 
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(0,0,0,0.8); padding: 1rem; border-radius: 10px;
+        }
+        .feedback { 
+            text-align: center; font-size: 1.2rem; margin: 1rem 0;
+            padding: 1rem; border-radius: 10px;
+        }
+        .feedback.success { background: rgba(81, 207, 102, 0.3); }
+        .feedback.error { background: rgba(255, 107, 107, 0.3); }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h2>🌌 DARPAN Games</h2>
+        </div>
+        <div class="user-info">
+            <div>
+                <div>Welcome, <span id="username"></span>!</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="overall-progress"></div>
+                </div>
+            </div>
+            <button class="btn secondary" onclick="goHome()">🏠 Home</button>
+        </div>
+    </div>
+
+    <div id="game-selection" class="game-selection">
+        <div class="game-card" onclick="startGame('math-fractions')">
+            <div class="game-icon">🍕</div>
+            <h3>Math: Fraction Pizza</h3>
+            <p>Help aliens divide pizzas into equal parts. Learn fractions through resource management!</p>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Difficulty: ⭐⭐⭐ | Time: 10 min
+            </div>
+        </div>
+
+        <div class="game-card" onclick="startGame('science-circuits')">
+            <div class="game-icon">⚡</div>
+            <h3>Science: Circuit Builder</h3>
+            <p>Build electrical circuits to power space stations. Learn about electricity and current flow!</p>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Difficulty: ⭐⭐⭐⭐ | Time: 15 min
+            </div>
+        </div>
+
+        <div class="game-card" onclick="startGame('engineering-bridge')">
+            <div class="game-icon">🌉</div>
+            <h3>Engineering: Bridge Designer</h3>
+            <p>Design bridges using geometric principles. Test your structures with physics simulation!</p>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Difficulty: ⭐⭐⭐⭐⭐ | Time: 20 min
+            </div>
+        </div>
+
+        <div class="game-card" onclick="startGame('tech-coding')">
+            <div class="game-icon">💻</div>
+            <h3>Technology: Code Quest</h3>
+            <p>Program robots to solve puzzles. Learn basic programming concepts through visual coding!</p>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Difficulty: ⭐⭐⭐ | Time: 12 min
+            </div>
+        </div>
+    </div>
+
+    <div id="game-interface" class="game-interface">
+        <h2 id="game-title">Game Title</h2>
+        <div class="game-canvas" id="game-canvas">
+            <div class="score-display">
+                <div>Score: <span id="score">0</span></div>
+                <div>Time: <span id="timer">0:00</span></div>
+            </div>
+        </div>
+        <div id="feedback" class="feedback hidden"></div>
+        <div class="game-controls">
+            <button class="btn" onclick="showHint()">💡 Hint</button>
+            <button class="btn" onclick="resetCurrentGame()">🔄 Reset</button>
+            <button class="btn secondary" onclick="backToGames()">← Back to Games</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = JSON.parse(localStorage.getItem('user'));
+        let currentGame = null;
+        let gameState = {};
+        let gameTimer = null;
+        let startTime = null;
+
+        // Check authentication
+        if (!currentUser) {
+            window.location.href = '/';
+        }
+
+        document.getElementById('username').textContent = currentUser.username;
+
+        // Load user progress
+        loadProgress();
+
+        async function loadProgress() {
+            try {
+                const response = await fetch(`/api/progress/${currentUser.id}`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                const progress = await response.json();
+                
+                // Calculate overall progress
+                const totalMastery = progress.reduce((sum, p) => sum + p.mastery_level, 0);
+                const overallProgress = Math.min(100, (totalMastery / progress.length) * 100) || 0;
+                document.getElementById('overall-progress').style.width = overallProgress + '%';
+            } catch (error) {
+                console.error('Failed to load progress:', error);
+            }
+        }
+
+        function startGame(gameType) {
+            currentGame = gameType;
+            document.getElementById('game-selection').style.display = 'none';
+            document.getElementById('game-interface').style.display = 'block';
+            
+            startTime = Date.now();
+            gameTimer = setInterval(updateTimer, 1000);
+            
+            switch(gameType) {
+                case 'math-fractions':
+                    initFractionGame();
+                    break;
+                case 'science-circuits':
+                    initCircuitGame();
+                    break;
+                case 'engineering-bridge':
+                    initBridgeGame();
+                    break;
+                case 'tech-coding':
+                    initCodingGame();
+                    break;
+            }
+        }
+
+        function initFractionGame() {
+            document.getElementById('game-title').textContent = 'Math: Fraction Pizza Challenge';
+            const canvas = document.getElementById('game-canvas');
+            canvas.innerHTML = `
+                <div class="score-display">
+                    <div>Score: <span id="score">0</span></div>
+                    <div>Time: <span id="timer">0:00</span></div>
+                </div>
+                <div class="draggable" id="pizza1" style="top: 100px; left: 50px;" draggable="true">🍕 Whole Pizza</div>
+                <div class="draggable" id="pizza2" style="top: 200px; left: 50px;" draggable="true">🍕 Half Pizza</div>
+                <div class="drop-zone" style="top: 80px; right: 100px; width: 150px; height: 80px;">
+                    👽 Colony A<br><small>Needs: 1/2</small>
+                </div>
+                <div class="drop-zone" style="top: 200px; right: 100px; width: 150px; height: 80px;">
+                    👽 Colony B<br><small>Needs: 1/4</small>
+                </div>
+                <div class="drop-zone" style="top: 320px; right: 100px; width: 150px; height: 80px;">
+                    👽 Colony C<br><small>Needs: 3/4</small>
+                </div>
+            `;
+            
+            gameState = { score: 0, correctPlacements: 0, totalPlacements: 3 };
+            setupDragAndDrop();
+        }
+
+        function initCircuitGame() {
+            document.getElementById('game-title').textContent = 'Science: Circuit Builder Challenge';
+            const canvas = document.getElementById('game-canvas');
+            canvas.innerHTML = `
+                <div class="score-display">
+                    <div>Score: <span id="score">0</span></div>
+                    <div>Time: <span id="timer">0:00</span></div>
+                </div>
+                <div class="draggable" id="battery" style="top: 50px; left: 50px;" draggable="true">🔋 Battery</div>
+                <div class="draggable" id="resistor" style="top: 120px; left: 50px;" draggable="true">📏 Resistor</div>
+                <div class="draggable" id="led" style="top: 190px; left: 50px;" draggable="true">💡 LED</div>
+                <div class="drop-zone" style="top: 100px; left: 300px; width: 100px; height: 60px;">
+                    Power Source
+                </div>
+                <div class="drop-zone" style="top: 100px; left: 450px; width: 100px; height: 60px;">
+                    Component
+                </div>
+                <div class="drop-zone" style="top: 100px; left: 600px; width: 100px; height: 60px;">
+                    Output
+                </div>
+            `;
+            
+            gameState = { score: 0, correctPlacements: 0, totalPlacements: 3 };
+            setupDragAndDrop();
+        }
+
+        function initBridgeGame() {
+            document.getElementById('game-title').textContent = 'Engineering: Bridge Designer Challenge';
+            const canvas = document.getElementById('game-canvas');
+            canvas.innerHTML = `
+                <div class="score-display">
+                    <div>Score: <span id="score">0</span></div>
+                    <div>Time: <span id="timer">0:00</span></div>
+                </div>
+                <div style="position: absolute; top: 50px; left: 50px; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; color: #333;">
+                    <h4>Bridge Materials:</h4>
+                    <div class="draggable" id="beam1" style="position: relative; margin: 5px;" draggable="true">📏 Steel Beam</div>
+                    <div class="draggable" id="beam2" style="position: relative; margin: 5px;" draggable="true">📏 Wood Beam</div>
+                    <div class="draggable" id="cable" style="position: relative; margin: 5px;" draggable="true">🔗 Cable</div>
+                </div>
+                <div style="position: absolute; bottom: 50px; left: 200px; width: 400px; height: 100px; border: 3px solid #fff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    🌉 Bridge Construction Area
+                </div>
+                <div style="position: absolute; bottom: 20px; right: 50px; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; color: #333;">
+                    <button class="btn" onclick="testBridge()">🧪 Test Bridge</button>
+                </div>
+            `;
+            
+            gameState = { score: 0, materialsUsed: 0, bridgeStrength: 0 };
+            setupDragAndDrop();
+        }
+
+        function initCodingGame() {
+            document.getElementById('game-title').textContent = 'Technology: Code Quest Challenge';
+            const canvas = document.getElementById('game-canvas');
+            canvas.innerHTML = `
+                <div class="score-display">
+                    <div>Score: <span id="score">0</span></div>
+                    <div>Time: <span id="timer">0:00</span></div>
+                </div>
+                <div style="position: absolute; top: 50px; left: 50px; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; color: #333;">
+                    <h4>Code Blocks:</h4>
+                    <div class="draggable" id="move" style="position: relative; margin: 5px; background: #4ECDC4;" draggable="true">➡️ Move Forward</div>
+                    <div class="draggable" id="turn" style="position: relative; margin: 5px; background: #FFD93D;" draggable="true">🔄 Turn Right</div>
+                    <div class="draggable" id="loop" style="position: relative; margin: 5px; background: #FF6B6B;" draggable="true">🔁 Repeat 3x</div>
+                </div>
+                <div style="position: absolute; top: 50px; right: 50px; width: 300px; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; color: #333;">
+                    <h4>Program Sequence:</h4>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;">Step 1</div>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;">Step 2</div>
+                    <div class="drop-zone" style="position: relative; margin: 5px; height: 40px; border: 2px dashed #ccc;">Step 3</div>
+                    <button class="btn" onclick="runProgram()" style="margin-top: 10px;">▶️ Run Program</button>
+                </div>
+                <div style="position: absolute; bottom: 50px; left: 50px; font-size: 3rem;">🤖</div>
+                <div style="position: absolute; bottom: 50px; right: 200px; font-size: 2rem;">🎯 Goal</div>
+            `;
+            
+            gameState = { score: 0, programSteps: [], robotPosition: { x: 0, y: 0 } };
+            setupDragAndDrop();
+        }
+
+        function setupDragAndDrop() {
+            const draggables = document.querySelectorAll('.draggable');
+            const dropZones = document.querySelectorAll('.drop-zone');
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', e.target.id);
+                    e.target.style.opacity = '0.5';
+                });
+
+                draggable.addEventListener('dragend', (e) => {
+                    e.target.style.opacity = '1';
+                });
+            });
+
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('active');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('active');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('active');
+                    handleDrop(e, zone);
+                });
+            });
+        }
+
+        function handleDrop(e, zone) {
+            const draggedId = e.dataTransfer.getData('text/plain');
+            const draggedElement = document.getElementById(draggedId);
+            
+            // Game-specific drop logic
+            if (currentGame === 'math-fractions') {
+                handleFractionDrop(draggedId, zone);
+            } else if (currentGame === 'science-circuits') {
+                handleCircuitDrop(draggedId, zone);
+            } else if (currentGame === 'engineering-bridge') {
+                handleBridgeDrop(draggedId, zone);
+            } else if (currentGame === 'tech-coding') {
+                handleCodingDrop(draggedId, zone);
+            }
+            
+            draggedElement.style.display = 'none';
+            updateScore(10);
+        }
+
+        function handleFractionDrop(draggedId, zone) {
+            gameState.correctPlacements++;
+            showFeedback(`Great! You fed the hungry aliens!`, 'success');
+            
+            if (gameState.correctPlacements >= gameState.totalPlacements) {
+                setTimeout(() => completeGame(), 1000);
+            }
+        }
+
+        function handleCircuitDrop(draggedId, zone) {
+            gameState.correctPlacements++;
+            showFeedback(`Circuit component placed correctly!`, 'success');
+            
+            if (gameState.correctPlacements >= gameState.totalPlacements) {
+                setTimeout(() => {
+                    showFeedback(`Circuit complete! The LED lights up! ⚡💡`, 'success');
+                    completeGame();
+                }, 1000);
+            }
+        }
+
+        function handleBridgeDrop(draggedId, zone) {
+            gameState.materialsUsed++;
+            gameState.bridgeStrength += 10;
+            showFeedback(`Material added to bridge! Strength: ${gameState.bridgeStrength}`, 'success');
+        }
+
+        function handleCodingDrop(draggedId, zone) {
+            gameState.programSteps.push(draggedId);
+            showFeedback(`Code block added to program!`, 'success');
+        }
+
+        function testBridge() {
+            if (gameState.bridgeStrength >= 30) {
+                showFeedback(`Bridge test successful! Strong enough to hold weight! 🌉✅`, 'success');
+                completeGame();
+            } else {
+                showFeedback(`Bridge needs more support! Add more materials.`, 'error');
+            }
+        }
+
+        function runProgram() {
+            if (gameState.programSteps.length >= 3) {
+                showFeedback(`Program executed successfully! Robot reached the goal! 🤖🎯`, 'success');
+                completeGame();
+            } else {
+                showFeedback(`Program needs more steps to reach the goal!`, 'error');
+            }
+        }
+
+        function updateScore(points) {
+            gameState.score += points;
+            document.getElementById('score').textContent = gameState.score;
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.classList.remove('hidden');
+            
+            setTimeout(() => {
+                feedback.classList.add('hidden');
+            }, 3000);
+        }
+
+        async function completeGame() {
+            clearInterval(gameTimer);
+            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+            
+            // Save game session
+            try {
+                await fetch('/api/game-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        subject: currentGame.split('-')[0],
+                        gameType: currentGame,
+                        score: gameState.score,
+                        timeSpent: timeSpent,
+                        completed: true
+                    })
+                });
+                
+                showFeedback(`🎉 Game Complete! Score: ${gameState.score} | Time: ${Math.floor(timeSpent/60)}:${(timeSpent%60).toString().padStart(2,'0')}`, 'success');
+                loadProgress(); // Refresh progress
+                
+            } catch (error) {
+                console.error('Failed to save game session:', error);
+            }
+        }
+
+        function showHint() {
+            const hints = {
+                'math-fractions': 'Look at what each alien colony needs! Match the pizza sizes to their requirements.',
+                'science-circuits': 'Connect the battery to power source, resistor to component, and LED to output.',
+                'engineering-bridge': 'Use different materials to build a strong bridge. Test when you think it\'s ready!',
+                'tech-coding': 'Drag code blocks in the right order to make the robot reach the goal.'
+            };
+            
+            showFeedback(`💡 Hint: ${hints[currentGame]}`, 'success');
+        }
+
+        function resetCurrentGame() {
+            startGame(currentGame);
+        }
+
+        function backToGames() {
+            if (gameTimer) clearInterval(gameTimer);
+            document.getElementById('game-selection').style.display = 'grid';
+            document.getElementById('game-interface').style.display = 'none';
+        }
+
+        function goHome() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

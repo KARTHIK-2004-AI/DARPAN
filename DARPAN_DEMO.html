@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARPAN - Revolutionary Learning Game</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .header { text-align: center; margin-bottom: 3rem; }
+        .header h1 { font-size: 3rem; margin-bottom: 1rem; }
+        .universe-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 2rem; 
+        }
+        .universe-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid;
+            border-radius: 15px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        .universe-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .universe-icon {
+            width: 80px; height: 80px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem; font-weight: bold; margin: 0 auto 1rem;
+        }
+        .game-demo { 
+            display: none; 
+            background: rgba(0,0,0,0.8); 
+            padding: 2rem; 
+            border-radius: 15px; 
+            margin-top: 2rem; 
+        }
+        .game-canvas { 
+            width: 100%; height: 400px; 
+            background: linear-gradient(45deg, #00FFFF20, #000020);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .pizza-slice { 
+            position: absolute; 
+            font-size: 3rem; 
+            cursor: grab; 
+            transition: transform 0.2s;
+        }
+        .alien-colony { 
+            position: absolute; 
+            font-size: 2rem; 
+            background: rgba(255,255,255,0.2);
+            padding: 1rem; 
+            border-radius: 10px;
+        }
+        .controls { 
+            display: flex; 
+            justify-content: center; 
+            gap: 1rem; 
+            margin-top: 1rem; 
+        }
+        .btn { 
+            background: #4ECDC4; 
+            border: none; 
+            padding: 1rem 2rem; 
+            border-radius: 25px; 
+            color: white; 
+            cursor: pointer; 
+            font-size: 1rem;
+        }
+        .btn:hover { background: #45B7D1; }
+        .progress { 
+            width: 100%; 
+            height: 20px; 
+            background: rgba(255,255,255,0.2); 
+            border-radius: 10px; 
+            margin: 1rem 0;
+        }
+        .progress-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #4ECDC4, #44A08D); 
+            border-radius: 10px; 
+            width: 0%; 
+            transition: width 0.5s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌌 DARPAN</h1>
+            <p>Revolutionary Gamified Learning Universe</p>
+            <p><em>"Learning disguised as gaming"</em></p>
+        </div>
+
+        <div id="universe-selector">
+            <div class="universe-grid">
+                <div class="universe-card" style="border-color: #00FFFF" onclick="startGame('mathematics')">
+                    <div class="universe-icon" style="background: #00FFFF">🧮</div>
+                    <h3>Logic Realm</h3>
+                    <p>Mathematics</p>
+                    <p><em>Architect of Reality</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #FF6B35" onclick="startGame('physics')">
+                    <div class="universe-icon" style="background: #FF6B35">⚡</div>
+                    <h3>Force Galaxy</h3>
+                    <p>Physics</p>
+                    <p><em>Cosmic Engineer</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #4ECDC4" onclick="startGame('chemistry')">
+                    <div class="universe-icon" style="background: #4ECDC4">🧪</div>
+                    <h3>Reaction Labs</h3>
+                    <p>Chemistry</p>
+                    <p><em>Element Master</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #45B7D1" onclick="startGame('biology')">
+                    <div class="universe-icon" style="background: #45B7D1">🌱</div>
+                    <h3>Life Systems</h3>
+                    <p>Biology</p>
+                    <p><em>Life Guardian</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #96CEB4" onclick="startGame('computer-science')">
+                    <div class="universe-icon" style="background: #96CEB4">💻</div>
+                    <h3>Code City</h3>
+                    <p>Computer Science</p>
+                    <p><em>Digital Architect</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #FFEAA7" onclick="startGame('social-science')">
+                    <div class="universe-icon" style="background: #FFEAA7">🏛️</div>
+                    <h3>Civilization Hub</h3>
+                    <p>Social Science</p>
+                    <p><em>Time Keeper</em></p>
+                </div>
+                
+                <div class="universe-card" style="border-color: #DDA0DD" onclick="startGame('english')">
+                    <div class="universe-icon" style="background: #DDA0DD">📚</div>
+                    <h3>Story Studio</h3>
+                    <p>English</p>
+                    <p><em>Word Weaver</em></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-demo" class="game-demo">
+            <h2 id="game-title">Mathematics - Alien Pizza Federation</h2>
+            <div class="progress">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+            <div class="game-canvas" id="game-canvas">
+                <div class="pizza-slice" id="pizza1" style="top: 50px; left: 100px;" draggable="true">🍕</div>
+                <div class="pizza-slice" id="pizza2" style="top: 150px; left: 100px;" draggable="true">🍕</div>
+                <div class="alien-colony" style="top: 50px; right: 100px;">👽 Colony A<br><small>Needs: 1/2</small></div>
+                <div class="alien-colony" style="top: 200px; right: 100px;">👽 Colony B<br><small>Needs: 1/4</small></div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="showHint()">💡 Hint</button>
+                <button class="btn" onclick="resetGame()">🔄 Reset</button>
+                <button class="btn" onclick="backToUniverses()">← Back</button>
+            </div>
+            <div id="feedback" style="text-align: center; margin-top: 1rem; font-size: 1.2rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentGame = null;
+        let progress = 0;
+        let correctPlacements = 0;
+
+        function startGame(universe) {
+            currentGame = universe;
+            document.getElementById('universe-selector').style.display = 'none';
+            document.getElementById('game-demo').style.display = 'block';
+            
+            if (universe === 'mathematics') {
+                setupMathGame();
+            } else {
+                showComingSoon(universe);
+            }
+        }
+
+        function setupMathGame() {
+            document.getElementById('game-title').textContent = 'Mathematics - Alien Pizza Federation';
+            document.getElementById('feedback').innerHTML = 
+                '<p>🎯 <strong>Mission:</strong> Drag pizza slices to feed the hungry alien colonies!</p>' +
+                '<p>Each colony needs the exact fraction shown. Can you divide the pizzas correctly?</p>';
+            
+            // Add drag and drop functionality
+            const pizzas = document.querySelectorAll('.pizza-slice');
+            const colonies = document.querySelectorAll('.alien-colony');
+            
+            pizzas.forEach(pizza => {
+                pizza.addEventListener('dragstart', handleDragStart);
+                pizza.addEventListener('dragend', handleDragEnd);
+            });
+            
+            colonies.forEach(colony => {
+                colony.addEventListener('dragover', handleDragOver);
+                colony.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.id);
+            e.target.style.opacity = '0.5';
+        }
+
+        function handleDragEnd(e) {
+            e.target.style.opacity = '1';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const pizzaId = e.dataTransfer.getData('text/plain');
+            const pizza = document.getElementById(pizzaId);
+            
+            // Simple game logic - any drop counts as correct for demo
+            correctPlacements++;
+            progress = (correctPlacements / 2) * 100;
+            
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            pizza.style.display = 'none';
+            
+            if (correctPlacements === 1) {
+                document.getElementById('feedback').innerHTML = 
+                    '<p>🎉 Great job! Colony A is happy!</p><p>Now feed Colony B with the remaining pizza!</p>';
+            } else if (correctPlacements === 2) {
+                document.getElementById('feedback').innerHTML = 
+                    '<p>🏆 <strong>Mission Complete!</strong> Both colonies are fed!</p>' +
+                    '<p>You earned 50 XP and unlocked the "Fraction Master" badge!</p>' +
+                    '<p>Ready for the next challenge?</p>';
+            }
+        }
+
+        function showHint() {
+            document.getElementById('feedback').innerHTML = 
+                '<p>💡 <strong>Hint:</strong> Look at what each colony needs!</p>' +
+                '<p>Colony A needs 1/2 (half) of a pizza</p>' +
+                '<p>Colony B needs 1/4 (quarter) of a pizza</p>' +
+                '<p>Drag the pizza slices to the colonies that need them!</p>';
+        }
+
+        function resetGame() {
+            correctPlacements = 0;
+            progress = 0;
+            document.getElementById('progress-bar').style.width = '0%';
+            document.querySelectorAll('.pizza-slice').forEach(pizza => {
+                pizza.style.display = 'block';
+            });
+            document.getElementById('feedback').innerHTML = 
+                '<p>🎯 <strong>Mission:</strong> Drag pizza slices to feed the hungry alien colonies!</p>' +
+                '<p>Each colony needs the exact fraction shown. Can you divide the pizzas correctly?</p>';
+        }
+
+        function backToUniverses() {
+            document.getElementById('universe-selector').style.display = 'block';
+            document.getElementById('game-demo').style.display = 'none';
+            resetGame();
+        }
+
+        function showComingSoon(universe) {
+            const universeNames = {
+                'physics': 'Force Galaxy',
+                'chemistry': 'Reaction Labs',
+                'biology': 'Life Systems',
+                'computer-science': 'Code City',
+                'social-science': 'Civilization Hub',
+                'english': 'Story Studio'
+            };
+            
+            document.getElementById('game-title').textContent = universeNames[universe] + ' - Coming Soon!';
+            document.getElementById('feedback').innerHTML = 
+                '<p>🚀 <strong>This universe is under construction!</strong></p>' +
+                '<p>Our team of game designers and educators are crafting amazing learning experiences.</p>' +
+                '<p>Try the Mathematics universe for now, or check back soon for updates!</p>';
+            
+            document.getElementById('game-canvas').innerHTML = 
+                '<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 4rem;">🚧</div>';
+        }
+
+        // Initialize the demo
+        console.log('🌌 DARPAN Demo Loaded Successfully!');
+        console.log('🎮 This is a simplified demo of the full DARPAN system');
+        console.log('📚 The complete system includes AI personalization, detailed analytics, and much more!');
+    </script>
+</body>
+</html>
