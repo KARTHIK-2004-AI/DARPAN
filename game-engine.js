@@ -31,8 +31,27 @@ class GameEngine {
       hintsUsed: 0
     };
 
+    if (this.currentArcadeSession) {
+      this.currentArcadeSession.stop();
+      this.currentArcadeSession = null;
+    }
+
+    if (gameType === 'arcade-space') {
+      // Initialize Real-time Arcade Mode
+      const canvas = document.getElementById('game-canvas');
+      // Ensure proper canvas sizing for arcade
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      this.currentArcadeSession = new CosmicDefender(canvas, {});
+      this.currentArcadeSession.start();
+      document.getElementById('game-title').textContent = "🚀 Cosmic Defender: Arcade Mode";
+      this.timer = setInterval(() => this.updateTimer(), 1000);
+      return;
+    }
+
     this.timer = setInterval(() => this.updateTimer(), 1000);
-    
+
     const gameConfig = this.getGameConfig(gameType);
     this.renderGame(gameConfig);
   }
@@ -107,9 +126,9 @@ class GameEngine {
   renderGame(config) {
     const canvas = document.getElementById('game-canvas');
     document.getElementById('game-title').textContent = config.title;
-    
+
     let html = '<div class="game-elements">';
-    
+
     // Render draggable elements
     const draggables = config.elements.filter(e => e.type === 'draggable');
     html += '<div class="draggables-container">';
@@ -127,7 +146,7 @@ class GameEngine {
       `;
     });
     html += '</div>';
-    
+
     // Render drop zones
     const dropzones = config.elements.filter(e => e.type === 'dropzone');
     html += '<div class="dropzones-container">';
@@ -143,7 +162,7 @@ class GameEngine {
       `;
     });
     html += '</div>';
-    
+
     // Add special buttons for certain games
     if (config.testRequired) {
       html += '<button class="btn test-btn" onclick="gameEngine.testBridge()">🧪 Test Bridge</button>';
@@ -151,10 +170,10 @@ class GameEngine {
     if (config.executeRequired) {
       html += '<button class="btn execute-btn" onclick="gameEngine.executeProgram()">▶️ Run Program</button>';
     }
-    
+
     html += '</div>';
     canvas.innerHTML = html;
-    
+
     this.setupDragAndDrop();
   }
 
@@ -190,7 +209,7 @@ class GameEngine {
       zone.addEventListener('drop', (e) => {
         e.preventDefault();
         zone.classList.remove('drag-over');
-        
+
         const data = JSON.parse(e.dataTransfer.getData('application/json'));
         this.handleDrop(data, zone);
       });
@@ -199,10 +218,10 @@ class GameEngine {
 
   handleDrop(dragData, dropZone) {
     this.gameState.totalAttempts++;
-    
+
     const accepts = dropZone.dataset.accepts;
     const isCorrect = accepts === 'any' || accepts === dragData.value;
-    
+
     this.trackInteraction({
       type: 'drop',
       correct: isCorrect,
@@ -215,15 +234,15 @@ class GameEngine {
       this.gameState.correctAnswers++;
       this.updateScore(20);
       this.showFeedback('Correct! Great job! 🎉', 'success');
-      
+
       // Hide dragged element
       const draggedElement = document.querySelector(`[data-id=\"${dragData.id}\"]`);
       if (draggedElement) draggedElement.style.display = 'none';
-      
+
       // Mark drop zone as filled
       dropZone.classList.add('filled');
       dropZone.innerHTML += `<div class="dropped-item">${dragData.value}</div>`;
-      
+
       // Check win condition
       const config = this.getGameConfig(this.currentGame);
       if (this.gameState.correctAnswers >= config.winCondition) {
@@ -236,7 +255,7 @@ class GameEngine {
 
   testBridge() {
     const strength = parseInt(document.querySelectorAll('.filled').length) * 10;
-    
+
     if (strength >= 30) {
       this.showFeedback('Bridge test successful! Strong enough! 🌉✅', 'success');
       this.completeGame();
@@ -247,7 +266,7 @@ class GameEngine {
 
   executeProgram() {
     const filledSteps = document.querySelectorAll('.drop-zone.filled').length;
-    
+
     if (filledSteps >= 3) {
       this.showFeedback('Program executed! Robot reached goal! 🤖🎯', 'success');
       this.completeGame();
@@ -277,7 +296,7 @@ class GameEngine {
     feedback.textContent = message;
     feedback.className = `feedback ${type}`;
     feedback.style.display = 'block';
-    
+
     setTimeout(() => {
       feedback.style.display = 'none';
     }, 3000);
@@ -285,27 +304,27 @@ class GameEngine {
 
   showHint() {
     this.gameState.hintsUsed++;
-    
+
     const hints = {
       'math-fractions': 'Match the pizza fractions to what each alien colony needs! Look at the labels carefully. 🍕',
       'science-circuits': 'Connect battery to power source, resistor to component, and LED to output to complete the circuit! ⚡',
       'engineering-bridge': 'Use different materials to build a strong bridge. Each material adds strength. Test when ready! 🌉',
       'tech-coding': 'Drag code blocks in the correct sequence to program the robot to reach the goal! 💻'
     };
-    
+
     this.showFeedback(`💡 Hint: ${hints[this.currentGame]}`, 'info');
   }
 
   async completeGame() {
     clearInterval(this.timer);
-    
+
     const timeSpent = Math.floor((Date.now() - this.gameState.startTime) / 1000);
-    const accuracy = this.gameState.totalAttempts > 0 
-      ? (this.gameState.correctAnswers / this.gameState.totalAttempts) 
+    const accuracy = this.gameState.totalAttempts > 0
+      ? (this.gameState.correctAnswers / this.gameState.totalAttempts)
       : 0;
-    
+
     const config = this.getGameConfig(this.currentGame);
-    
+
     // Save to backend
     try {
       const response = await fetch('/api/game-session', {
@@ -325,10 +344,10 @@ class GameEngine {
           interactions: this.gameState.interactions
         })
       });
-      
+
       if (response.ok) {
         this.showFeedback(
-          `🎉 Game Complete! Score: ${this.gameState.score} | Time: ${Math.floor(timeSpent/60)}:${(timeSpent%60).toString().padStart(2,'0')} | Accuracy: ${Math.round(accuracy*100)}%`, 
+          `🎉 Game Complete! Score: ${this.gameState.score} | Time: ${Math.floor(timeSpent / 60)}:${(timeSpent % 60).toString().padStart(2, '0')} | Accuracy: ${Math.round(accuracy * 100)}%`,
           'success'
         );
       }
