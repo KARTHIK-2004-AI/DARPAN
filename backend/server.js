@@ -32,6 +32,8 @@ app.use("/api", limiter);
 app.use("/api/users", require("./src/routes/userRoutes"));
 app.use("/api/games", require("./src/routes/gameRoutes"));
 
+
+
 // Centralized error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
