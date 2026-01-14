@@ -257,7 +257,54 @@ docker run -p 3000:3000 darpan
 - **Engineering**: Structural design, problem-solving
 - **Technology**: Programming logic, computational thinking
 
-## 🔮 Future Enhancements
+## � Full Project Structure
+
+### Main Platform (Vanilla Stack)
+```
+DARPAN2/
+├── index.html              # Landing & auth portal
+├── login.html              # Student login
+├── register.html           # New student registration
+├── dashboard.html          # Student progress dashboard
+├── game.html               # Game interface
+├── admin.html              # Admin management panel
+├── server.js               # Express.js backend
+├── styles.css              # Global styling
+├── game-engine.js          # Core game logic
+├── arcade-games.js         # Arcade game implementations
+├── MathematicsGames.js     # Math-specific games
+├── PersonalizationEngine.js # Adaptive learning
+└── package.json            # Root dependencies
+```
+
+### React Full-Stack (comprehensive-game-platform/)
+```
+comprehensive-game-platform/
+├── backend/                # Node.js/Express API
+│   ├── src/
+│   │   ├── app.js          # Express setup
+│   │   ├── config/
+│   │   │   └── db.js       # Database config
+│   │   ├── controllers/    # Route handlers
+│   │   ├── models/         # Database schemas
+│   │   ├── routes/         # API endpoints
+│   │   ├── middleware/     # Auth, validation
+│   │   └── utils/          # Helper functions
+│   └── package.json
+│
+└── frontend/               # React.js UI
+    ├── src/
+    │   ├── App.js          # Main React component
+    │   ├── App.css         # App styling
+    │   ├── GameEngine.js   # Game implementation
+    │   ├── PersonalizationEngine.js
+    │   ├── pages/          # React pages
+    │   └── services/       # API calls
+    ├── public/             # Static assets
+    └── package.json
+```
+
+## �🔮 Future Enhancements
 
 ### Planned Features
 - **AI Tutoring**: Personalized learning assistants
